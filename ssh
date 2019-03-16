@@ -1,0 +1,52 @@
+#!/bin/bash
+
+direc=`dirname $0`
+
+function description(){
+    echo -e "\033[0;41m####################################################\033[m"
+    echo -e "\033[0;41m**************** SSH连接管理工具 *******************\033[m"
+    echo -e "\033[0;41m####################################################\033[m"
+}
+
+function underline(){
+    echo "----------------------------------------------------"
+}
+
+function main(){
+
+while [ True ];do
+    underline
+    awk 'BEGIN {FS="|"} {printf("\033[0;31m% 4s\033[m|%18s|%6s|%s\n",$1,$2,$3,$6)}' $direc/config-ssh/config.lst
+    underline
+    read -p '[*] 选择主机: ' number
+    pw="$direc/config-ssh/config.lst"
+    ipaddr=$(awk -v num=$number 'BEGIN {FS="|"} {if($1 == num) {print $2}}' $pw)
+    port=$(awk -v num=$number 'BEGIN {FS="|"} {if($1 == num) {print $3}}' $pw)
+    username=$(awk -v num=$number 'BEGIN {FS="|"} {if($1 == num) {print $4}}' $pw)
+    passwd=$(awk -v num=$number 'BEGIN {FS="|"} {if($1 == num) {print $5}}' $pw)
+
+    case $number in
+        [0-9]|[0-9][0-9]|[0-9][0-9][0-9])
+            echo $passwd | grep -q ".pem$"
+            RETURN=$?
+            if [[ $RETURN == 0 ]];then
+                ssh -i $direc/config-ssh/keys/$passwd $username@$ipaddr -p $port
+                echo "ssh -i $direc/config-ssh/keys/$passwd $username@$ipaddr -p $port"
+            else
+                expect -f $direc/config-ssh/connect.exp $ipaddr $username $passwd $port
+            fi
+        ;;
+        "q"|"quit")
+            exit
+        ;;
+
+        *)
+            echo "输入错误，请输入正确的序号!!"
+            underline
+        ;;
+    esac
+done
+}
+
+description
+main
