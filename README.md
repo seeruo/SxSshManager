@@ -8,7 +8,7 @@ SSH连接管理工具
 # 下载
 直接下载或git下来
 ```
-git clone https://github.com/seeruo/SxSSHManager.git sxsshmanager
+git clone https://github.com/seeruo/SxSshManager.git
 ```
 
 # 配置
